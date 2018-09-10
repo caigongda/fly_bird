@@ -1,0 +1,424 @@
+<!DOCTYPE html> 
+<html>
+<head> 
+	<meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+	<title>flappy bird</title>
+    <script src="./js/phaser.js"></script>
+    <script src="./js/main.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: "微软雅黑"
+        }
+        canvas {
+            margin: 0 auto;
+        }
+        #game{
+            width: 100%;
+        }
+        .tabbar{
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            border-top: 1px solid #DCDFE6;
+            width: 100%;
+            height: 49px;
+            background: #fff;
+            text-align: center;
+        }
+        .tabbar-left{
+            width: 50%;
+            float: left;
+            height:100%;
+            border-right:1px solid #dddddd;
+            display: flex;
+            flex-direction: column;
+        }
+        .tabbar-right{
+            width: calc(50% - 1px);
+            float: left;
+            height:100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .active{
+            background: #F2F6FC;
+            color:#409EFF;
+        }
+        .page{
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            position: absolute;
+            top: 0;
+            left: 0;
+            box-sizing: border-box;
+            padding: 30px 20px;
+        }
+        .pagemain{
+            height: calc(100% - 50px);
+            width: 100%;
+            background: #fff;
+            position: absolute;
+            top: 0;
+            left: 0;
+            box-sizing: border-box;
+            padding: 30px 20px;
+        }
+        fieldset{
+            border:1px solid #409EFF;
+        }
+        legend{
+            border: 1px solid #F56C6C;
+            border-radius: 5px;
+            background: #F56C6C;
+            color: #fff
+        }
+        button{
+            margin: 0;
+            outline: none;
+            display: inline-block;
+            line-height: 1;
+            white-space: nowrap;
+            cursor: pointer;
+            background: #fff;
+            border: 1px solid #dcdfe6;
+            border-color: #dcdfe6;
+            color: #606266;
+            -webkit-appearance: none;
+            text-align: center;
+            box-sizing: border-box;
+            transition: .1s;
+            font-weight: 500;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            font-size: 14px;
+            border-radius: 4px;
+            background-color: #409eff;
+            border-color: #409eff;
+            color:#fff;
+        }
+        .btn{
+            text-align: center;
+        }
+        .btn button{
+            width: 60%;
+            box-sizing: border-box;
+            margin: 10px;
+            padding: 9px 15px;
+        }
+        .hidden{
+            display: none;
+        }
+        .game{
+            width: 100%;
+            height: 50%;
+            background: url(./assets/fonts/game.svg) no-repeat;
+            background-position: 50% 10%;
+            background-size: 50px 32px;
+        }
+        .person{
+            width: 100%;
+            height: 50%;
+            background: url(./assets/fonts/person.svg) no-repeat;
+            background-position: 50% 10%;
+            background-size: 50px 32px;
+        }
+        .game-tips{
+            position: absolute;
+            bottom:59px;
+            width: 100%;
+            height: 20px;
+            line-height: 20px;
+            text-align: center;
+            color:#409eff; 
+        }
+        .game-text{
+            width: 100%;
+            height: 50%;
+        }
+        .person-text{
+            width: 100%;
+            height: 50%;
+        }
+        .money{
+            color: red;
+            margin:0;
+            display: inline-block;
+        }
+        .money-wrap{
+            text-align: center;
+        }
+        .text-wrap{
+            display: flex;
+            justify-content: space-between;
+        }
+        .set-wallet{
+            color: #409eff;
+        }
+        .record{
+            height: 60px;
+            border-bottom: 1px solid #d1d1d1;
+        }
+        .navgater{
+            height: 50px;
+            color: #409eff;
+            text-align: left;
+        }
+        .pay-btn{
+            margin-top: 30%;
+        }
+        .center{
+            width: 100%;
+            text-align: center;
+        }
+        .pay-header{
+            margin:10px 0;
+        }
+        .pay-info{
+            text-indent:2em;
+        }
+        input{
+            height: 20px;
+            text-align: center;
+        }
+        .color{
+            color: #409eff;
+        }
+        .layer{
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            -webkit-transform: translateX(-50%);
+        }
+        .layer-con{
+            background: rgba(0,0,0,.6);
+            color: #fff;
+            padding: 5px 10px;
+        }
+        .score-tips{
+            position: absolute;
+            top: 35%;
+            left: 50%;
+            transform: translateX(-50%);
+            -webkit-transform: translateX(-50%);
+            padding: 10px 20px;
+            text-align: center;
+            background: #fff;
+            border-radius: 5px;
+        }
+        .score-tips h4{
+            color:red;
+        }
+    </style>
+</head>
+<body>
+<div id="game">
+    <div class="score-tips"><h2>通关目标</h2><h4>获得20分</h4></div>
+    <div class="game-tips" onclick="backHome()">回到主页</div>
+</div>
+<div class="pagemain page1" id="page1">
+    <fieldset>
+    <legend>奖励说明</legend>
+    达成通关目标即奖励现金红包（最低10元）关卡难度越高奖励越高，根据你的实力选择对应难度吧！通关后即可提现！赶快来试试吧！
+  </fieldset>
+  <p style="text-align: center;color: #409eff">
+    <span onclick="alert('点击屏幕可以控制小鸟上飞一段距离，控制小鸟不要碰到管道或者落地。每通过一个管道可得一分，得分超过目标分数即可领取对应奖励')">查看游戏玩法</span>
+  </p>
+  <div class="btn">
+      <button onclick="play(200)">简单（奖励10元）</button><br>
+      <button onclick="play(500)">普通（奖励20元）</button><br>
+      <button onclick="play(800)">专家（奖励40元）</button><br>
+      <button onclick="play(1200)">地狱（奖励80元）</button>
+  </div>
+</div>
+<div class="pagemain page2 hidden" id="page2">
+    <div>累计赢得现金:</div>
+    <div class="money-wrap"><h1 class="money">0</h1>元</div>
+    <div class="text-wrap"><div>提现记录:</div><div class="set-wallet" onclick="setwallet()">设置提现账户</div></div>
+    <div class="record"></div>
+</div>
+<div class="tabbar">
+    <div class="tabbar-left active" id="tleft" onclick="addActive('tright',this)">
+        <div class="game"></div><div class="game-text">a</div>
+    </div>
+    <div class="tabbar-right" id="tright" onclick="addActive('tleft',this)">
+        <div class="person"></div><div class="person-text">a</div>
+    </div>
+</div>
+<div class="page page3 hidden">
+    <div class="navgater"><span onclick="hidepage('.page3')">返回</span></div>
+    <div class="btn pay-btn">
+      <button onclick="paymethod('1')">支付宝</button><br>
+      <button onclick="paymethod('2')">微信</button><br>
+      <button onclick="paymethod('3')">银行卡</button>
+    </div>
+</div>
+<div class="page page4 hidden">
+    <div class="navgater"><span onclick="hidepage('.page4')">返回</span></div>
+    <header class="center pay-header">支付宝账号</header>
+    <div class="center"><input type="text" name="account" placeholder="尚未设置" class="zhifubao" value="" /></div>
+    <div class="center pay-header color" onclick="creatacount('1')">确定</div>
+    <div class="pay-header">
+        <h5>支付宝提现说明:</h5>
+        <div class="pay-info">
+            请输入已经实名认证的支付宝账号，未实名认证会导致转账失败。申请提现后，奖金会在三个工作日内转账到支付宝账号。请确保账号填写正确。
+        </div>
+    </div>
+</div>
+<div class="page page5 hidden">
+    <div class="navgater"><span onclick="hidepage('.page5')">返回</span></div>
+    <header class="center pay-header">微信账号</header>
+    <div class="center"><input type="text" name="account" placeholder="尚未设置" class="weixin" value="" /></div>
+    <div class="center pay-header color" onclick="creatacount('2')">确定</div>
+    <div class="pay-header">
+        <h5>微信提现说明:</h5>
+        <div class="pay-info">
+            请输入正确的微信账号。申请提现后工作人员会添加您为好友，请务必通过。申请提现后，奖金会在三个工作日内通过微信红包发放。
+        </div>
+    </div>
+</div>
+<div class="page page6 hidden">
+    <div class="navgater"><span onclick="hidepage('.page6')">返回</span></div>
+    <header class="center pay-header">银行卡账号</header>
+    <div class="center"><input type="text" name="account" placeholder="尚未设置" class="yingh-acount" value="" /></div>
+    <header class="center pay-header">开户人姓名</header>
+    <div class="center"><input type="text" name="account" placeholder="尚未设置" class="yingh-name" value="" /></div>
+    <div class="center pay-header color" onclick="creatacount('3')">确定</div>
+    <div class="pay-header">
+        <h5>银行卡提现说明:</h5>
+        <div class="pay-info">
+            请输入正确的卡号、姓名，仅支持中国境内的借记卡。申请提现后，奖金会在三个工作日内通过银行转账发放，具体到账时间可能会受银行影响。
+        </div>
+    </div>
+</div>
+<div class="layer hidden">
+    <div class="layer-con"></div>
+</div>
+</body>
+<script type="text/javascript">
+    var gamespeed,game;
+    var storage=window.localStorage;
+    function cgd(elem){
+        this.el=document.querySelector(elem);
+    };
+    cgd.prototype={
+        show:function(){
+            this.el.style.display="block";
+        },
+        hide:function(){
+            this.el.style.display="none";
+        },
+        setiptval:function(val){
+            this.el.value=val;
+        },
+        iptval:function(){
+            return this.el.value;
+        },
+        settext:function(text){
+            this.el.innerText=text;
+        }
+    };
+    function $(el){
+        return new cgd(el)
+    }
+    function layer(text,time){
+        $(".layer-con").settext(text);
+        $(".layer").show();
+        setTimeout(function(){
+            $(".layer").hide();
+        },time)
+    }
+    var tableft=document.getElementById('tleft');
+    var tabright=document.getElementById('tleft');
+    function addActive(elem,that) {
+        var curtab=document.getElementById(elem);
+        curtab.classList.remove("active");
+        that.classList.add("active");
+        switch (elem){
+            case "tright":
+            $("#page2").hide();
+            break;
+            case "tleft":
+            $("#page2").show();
+            break;
+        }
+    };
+    function hidepage(el){
+        $(el).hide();
+    };
+    function play(speed){
+        $("#page1").hide();
+        gamespeed=speed;
+        setTimeout(function(){
+            $(".score-tips").hide();
+        },500)
+    };
+    function backHome(){
+        $("#page1").show();
+        game.state.start('boot');
+    };
+    function setwallet(){
+        $(".page3").show();
+    }
+    function paymethod(parm){
+        switch(parm){
+            case "1":
+            $(".page4").show();
+            $(".zhifubao").setiptval(storage.getItem("zhifubao"));
+            break;
+            case "2":
+            $(".page5").show();
+            $(".weixin").setiptval(storage.getItem("weixin"));
+            break;
+            case "3":
+            $(".page6").show();
+            $(".yingh-name").setiptval(storage.getItem("yingh-name"));
+            $(".yingh-acount").setiptval(storage.getItem("yingh-acount"));
+            break;
+        }
+    }
+    function creatacount(parm){
+        switch(parm){
+            case "1":
+            if ($(".zhifubao").iptval()!="") {
+                storage.setItem("zhifubao",$(".zhifubao").iptval());
+                layer("设置成功",500);
+                hidepage(".page4");
+            }else{
+                layer("不能为空哦",500);
+            }
+            break;
+            case "2":
+            if ($(".weixin").iptval()!="") {
+                storage.setItem("weixin",$(".weixin").iptval());
+                layer("设置成功",500);
+                hidepage(".page5");
+            }else{
+                layer("不能为空哦",500);
+            }
+            break;
+            case "3":
+            if ($(".yingh-name").iptval()!=""&&$(".yingh-acount").iptval()!="") {
+                storage.setItem("yingh-name",$(".yingh-name").iptval());
+                storage.setItem("yingh-acount",$(".yingh-acount").iptval());
+                layer("设置成功",500);
+                hidepage(".page6");
+            }else{
+                layer("不能为空哦",500);
+            }
+            break;
+        }
+    };
+    function success(){
+
+    }
+</script>
+</html>
